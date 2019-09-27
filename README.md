@@ -25,7 +25,7 @@ Heap will enlarge with a help of system call and will change the data segment si
 
 Text segment contains read-only data for execution. Data segment contains data which is already defined in code for static variables initialization.
 
-{55d0f41c0000-55d0f425b000 r-xp 00000000 fd:00 73759                      /bin/bash
+```55d0f41c0000-55d0f425b000 r-xp 00000000 fd:00 73759                      /bin/bash
 55d0f425b000-55d0f425f000 r--p 0009a000 fd:00 73759                      /bin/bash
 55d0f425f000-55d0f4262000 rw-p 0009e000 fd:00 73759                      /bin/bash
 55d0f4262000-55d0f4266000 rw-p 00000000 00:00 0 
@@ -51,8 +51,9 @@ Text segment contains read-only data for execution. Data segment contains data w
 7ffdbe689000-7ffdbe6aa000 rw-p 00000000 00:00 0                          [stack]
 7ffdbe7dd000-7ffdbe7e0000 r--p 00000000 00:00 0                          [vvar]
 7ffdbe7e0000-7ffdbe7e2000 r-xp 00000000 00:00 0                          [vdso]
-ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]}
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]```
 
-Memory Mapping Segment - 78e3c0665000-78e3c0815000 
-Heap - 55d0f61a6000-55d0f62cf000
-Stack - 7ffdbe689000-7ffdbe6aa000
+Memory Mapping Segment - 78e3c0665000-78e3c0815000  
+Heap - 55d0f61a6000-55d0f62cf000  
+Stack - 7ffdbe689000-7ffdbe6aa000  
+
