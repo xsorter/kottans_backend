@@ -58,3 +58,8 @@ Memory Mapping Segment - 78e3c0665000-78e3c0815000
 Heap - 55d0f61a6000-55d0f62cf000  
 Stack - 7ffdbe689000-7ffdbe6aa000  
 
+## TCP. UDP. Network
+![task1](task_networks/task1.jpg)
+![task2](task_networks/task2.jpg)
+
+All materials was pretty understandble. "How dns works" is very funny resource which can help a lot to understand dns functionality.
