@@ -35,11 +35,11 @@ async function showResult(ports) {
       if (isOpened) {
         openedPorts.push(e);
       }
-      console.log(isOpened, e);
+      process.stdout.write(isOpened + " " + e + "\n");
     });
   });
 
-  console.log(`ports ${openedPorts.join()} are opened`);
+  process.stdout.write(`ports ${openedPorts.join()} are opened`);
 }
 
 showResult(ports);
