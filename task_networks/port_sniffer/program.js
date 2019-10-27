@@ -33,7 +33,7 @@ async function showResult(ports) {
   await ports.map(e => {
     openedPortCheck(args.host, e, isOpened => {
       if (isOpened) {
-        openedPorts.push(e);
+        openedPorts.push(Buffer.from(e.toString()));
       }
       process.stdout.write(isOpened + " " + e + "\n");
     });
