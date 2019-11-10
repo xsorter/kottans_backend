@@ -1,5 +1,5 @@
 const net = require("net");
-
+const dns = require("dns");
 const args = require("minimist")(process.argv.slice(2));
 let range;
 
@@ -12,9 +12,6 @@ if (args.ports) {
 let firstPort = +range[0];
 const lastPort = +range[1];
 const openedPorts = [];
-
-const ports =
-  range.length === 1 ? [firstPort] : populateArray(firstPort, lastPort);
 
 const openedPortCheck = (host, port, callback) => {
   const socket = net.createConnection(port, host);
@@ -38,11 +35,7 @@ const openedPortCheck = (host, port, callback) => {
   });
 };
 
-function populateArray(first, last) {
-  return Array.from({ length: last - first }, (_, k) => k + first);
-}
-
-const showResult = () => {
+const showResult = host => {
   if (args.help) {
     process.stdout.write(`
     Port sniffer CLI tool. \n
@@ -53,18 +46,34 @@ const showResult = () => {
     `);
     return false;
   }
-  openedPortCheck(args.host, firstPort, function next() {
+
+  openedPortCheck(host, firstPort, function next() {
     if (firstPort === lastPort) {
       if (openedPorts.length) {
         process.stdout.write(`\nports ${openedPorts.join()} are opened`);
-        process.exit();
+        return false;
       } else {
         process.stdout.write(`No opened ports was found`);
-        process.exit();
+        return false;
       }
     }
-    openedPortCheck(args.host, ++firstPort, next);
+    openedPortCheck(host, ++firstPort, next);
   });
 };
 
-showResult();
+const ipLookup = () => {
+  return new Promise((resolve, reject) => {
+    dns.lookup(args.host, (err, address, family) => {
+      if (err) reject(err);
+      resolve(address);
+    });
+  });
+};
+
+ipLookup()
+  .then(res => {
+    showResult(res);
+  })
+  .catch(err => {
+    process.stdout.write(`Adress not found`);
+  });
