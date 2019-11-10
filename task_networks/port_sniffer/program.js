@@ -42,7 +42,7 @@ const showResult = host => {
     Parameters:
     --ports - type ports range
     --host - provide host IP adress or domain name \n
-    Usage example: node program.js ports 80-87 --host 172.217.3.110
+    Usage example: node program.js --ports 80-87 --host 172.217.3.110
     `);
     return false;
   }
