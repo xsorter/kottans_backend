@@ -1,37 +1,26 @@
 const net = require("net");
 const dns = require("dns");
 const args = require("minimist")(process.argv.slice(2));
-let range;
+const range = findPortsRange();
 
-if (args.ports) {
-  if (args.ports.length) {
-    range = args.ports.toString().split("-");
-  } else {
-    process.stdout.write(
-      "Please provide a port number range or do not use --port parameter for default values (0-65535)"
-    );
-    process.exit(1);
-  }
-} else {
-  range = ["0", "65535"];
-}
-
-let firstPort = +range[0];
-const lastPort = +range[1] ? +range[1] : +range[0];
-const openedPorts = [];
+const ports = {
+  firstPort: +range[0],
+  lastPort: +range[1] ? +range[1] : +range[0],
+  openedPorts: []
+};
 
 const openedPortCheck = (host, port, callback) => {
   const socket = net.createConnection(port, host);
-  var time = setTimeout(() => {
+  let time = socket.setTimeout(300, () => {
     socket.destroy();
     callback(false);
-  }, 300);
+  });
 
   socket.on("connect", () => {
     clearTimeout(time);
     socket.destroy();
     process.stdout.write(".");
-    openedPorts.push(port);
+    ports.openedPorts.push(port);
     callback(true);
   });
   socket.on("error", function() {
@@ -42,36 +31,55 @@ const openedPortCheck = (host, port, callback) => {
 
 const showResult = host => {
   if (args.help) {
-    process.stdout.write(`
-    Port sniffer CLI tool. \n
-    Parameters:
-    --ports - type ports range
-    --host - provide host IP adress or domain name \n
-    Usage example: node program.js --ports 80-87 --host 172.217.3.110
-    `);
+    process.stdout.write(messages().help);
     process.exit(1);
   }
-
   if (!args.host) {
-    process.stdout.write(
-      "Please provide host name. Type --help for usage manual."
-    );
+    process.stdout.write(messages().noHost);
     process.exit(1);
   } else {
-    openedPortCheck(host, firstPort, function next() {
-      if (firstPort === lastPort) {
-        if (openedPorts.length) {
-          process.stdout.write(`\nports ${openedPorts.join()} are opened`);
+    openedPortCheck(host, ports.firstPort, function nextIteration() {
+      if (ports.firstPort === ports.lastPort) {
+        if (ports.openedPorts.length) {
+          process.stdout.write(messages(ports.openedPorts.join()).openedPorts);
           process.exit();
         } else {
-          process.stdout.write(`No opened ports was found`);
+          process.stdout.write(messages().portsNotFound);
           process.exit(1);
         }
       }
-      openedPortCheck(host, ++firstPort, next);
+      openedPortCheck(host, ++ports.firstPort, nextIteration);
     });
   }
 };
+
+function findPortsRange() {
+  if (args.ports) {
+    if (args.ports.length) {
+      return args.ports.toString().split("-");
+    } else {
+      process.stdout.write(messages().emptyPortsParameter);
+      process.exit(1);
+    }
+  } else {
+    return ["0", "65535"];
+  }
+}
+
+function messages(openedPortsNumbers) {
+  return {
+    help: `Port sniffer CLI tool. \n
+    Parameters:
+    --ports - type ports range
+    --host - provide host IP adress or domain name \n
+    Usage example: node program.js --ports 80-87 --host google.com`,
+    noHost: "Please provide host name. Type --help for usage manual.",
+    openedPorts: `\nports ${openedPortsNumbers} are opened`,
+    portsNotFound: "No opened ports was found",
+    emptyPortsParameter:
+      "Please provide a port numbers range or skip --port parameter for default values (0-65535)"
+  };
+}
 
 const ipLookup = () => {
   return new Promise((resolve, reject) => {
@@ -83,9 +91,5 @@ const ipLookup = () => {
 };
 
 ipLookup()
-  .then(res => {
-    showResult(res);
-  })
-  .catch(err => {
-    process.stdout.write(`Adress not found`);
-  });
+  .then(res => showResult(res))
+  .catch(() => process.stdout.write(`Adress not found`));
