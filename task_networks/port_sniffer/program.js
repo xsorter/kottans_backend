@@ -1,9 +1,43 @@
+const mapLimit = require("async/mapLimit");
+
 const net = require("net");
 const dns = require("dns");
 const args = require("minimist")(process.argv.slice(2));
 const range = findPortsRange();
 
 const ports = {
+  //fill list from range here
+  portList: [
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    442,
+    443,
+    444,
+    445
+  ],
   firstPort: +range[0],
   lastPort: +range[1] ? +range[1] : +range[0],
   openedPorts: []
@@ -38,7 +72,23 @@ const showResult = host => {
     process.stdout.write(messages().noHost);
     process.exit(1);
   } else {
-    openedPortCheck(host, ports.firstPort, function nextIteration() {
+    mapLimit(ports.portList, 20, async (e, i) => {
+      await openedPortCheck(host, e, () => {
+        if (e === 445) {
+          //if current == last port from list
+          if (ports.openedPorts.length) {
+            process.stdout.write(
+              messages(ports.openedPorts.join()).openedPorts
+            );
+            process.exit();
+          } else {
+            process.stdout.write(messages().portsNotFound);
+            process.exit(1);
+          }
+        }
+      });
+    });
+    /*openedPortCheck(host, ports.firstPort, function nextIteration() {
       if (ports.firstPort === ports.lastPort) {
         if (ports.openedPorts.length) {
           process.stdout.write(messages(ports.openedPorts.join()).openedPorts);
@@ -49,7 +99,7 @@ const showResult = host => {
         }
       }
       openedPortCheck(host, ++ports.firstPort, nextIteration);
-    });
+    });*/
   }
 };
 
@@ -79,6 +129,10 @@ function messages(openedPortsNumbers) {
     emptyPortsParameter:
       "Please provide a port numbers range or skip --port parameter for default values (0-65535)"
   };
+}
+
+function fillArrayRange(arrLength, firstVal) {
+  return Array.from(new Array(arrLength), (val, i) => i + firstVal);
 }
 
 const ipLookup = () => {
